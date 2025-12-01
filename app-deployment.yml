@@ -51,7 +51,6 @@ spec:
       labels:
         app: java-db
     spec:
-      serviceAccountName: argocd-java-db
       imagePullSecrets:
         - name: ecr-creds
       containers:
