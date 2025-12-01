@@ -51,6 +51,7 @@ spec:
       labels:
         app: java-db
     spec:
+      serviceAccountName: argocd-java-db
       containers:
       - name: mysql-db
         image: 772683617793.dkr.ecr.us-east-1.amazonaws.com/java-proj:db01
