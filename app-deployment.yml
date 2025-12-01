@@ -1,0 +1,71 @@
+# ===========================
+# Persistent Volume (PV)
+# ===========================
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: java-db-pv
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: delete   # البيانات لا تمسح بعد حذف الـ PVC
+  storageClassName: manual-storage
+  hostPath:                                # تقدر تغيرها لو AWS EBS أو NFS
+    path: /mnt/data/mysql
+
+---
+# ===========================
+# Persistent Volume Claim (PVC)
+# ===========================
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: java-db-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: manual-storage
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+# ===========================
+# StatefulSet
+# ===========================
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: java-db
+spec:
+  serviceName: java-db
+  replicas: 1
+  selector:
+    matchLabels:
+      app: java-db
+  template:
+    metadata:
+      labels:
+        app: java-db
+    spec:
+      containers:
+      - name: mysql-db
+        image: 772683617793.dkr.ecr.us-east-1.amazonaws.com/java-proj:db01
+        ports:
+        - containerPort: 3306
+        volumeMounts:
+        - name: db-storage
+          mountPath: /var/lib/mysql   # المكان اللي الخزن هيثبت فيه
+  volumeClaimTemplates:
+  - metadata:
+      name: db-storage
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      resources:
+        requests:
+          storage: 5Gi
+      storageClassName: manual-storage
+
