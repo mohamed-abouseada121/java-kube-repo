@@ -7,13 +7,13 @@ metadata:
   name: java-db-pv
 spec:
   capacity:
-    storage: 1Gi
+    storage: 5Gi
   volumeMode: Filesystem
   accessModes:
     - ReadWriteOnce
-  persistentVolumeReclaimPolicy: delete   # البيانات لا تمسح بعد حذف الـ PVC
+  persistentVolumeReclaimPolicy: Delete
   storageClassName: manual-storage
-  hostPath:                                # تقدر تغيرها لو AWS EBS أو NFS
+  hostPath:
     path: /mnt/data/mysql
 
 ---
@@ -30,7 +30,7 @@ spec:
   storageClassName: manual-storage
   resources:
     requests:
-      storage: 1Gi
+      storage: 5Gi
 
 ---
 # ===========================
@@ -57,15 +57,10 @@ spec:
         ports:
         - containerPort: 3306
         volumeMounts:
-        - name: db-storage
-          mountPath: /var/lib/mysql   # المكان اللي الخزن هيثبت فيه
-  volumeClaimTemplates:
-  - metadata:
-      name: db-storage
-    spec:
-      accessModes: ["ReadWriteOnce"]
-      resources:
-        requests:
-          storage: 5Gi
-      storageClassName: manual-storage
+        - name: java-db-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: java-db-storage
+        persistentVolumeClaim:
+          claimName: java-db-pvc
 
